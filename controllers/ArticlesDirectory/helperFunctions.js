@@ -7,10 +7,10 @@ cloudinary.config({
     api_secret: '_px1mRCmIfA-b8bgz9NADudJCHY'
 });
 
-exports.uploadArticleCover = path => {
+exports.uploadArticleCover = (path,cloudinaryFolder) => {
     return new Promise ((resolve, reject) => {
         cloudinary.v2.uploader.upload(path,
-            { folder: "articles/",type:"private"},
+            { folder: cloudinaryFolder,type:"private"},
             (error,result)=>{
                 if (error) {
                     reject(error);

@@ -5,8 +5,9 @@ const articlesController = require("../../controllers/ArticlesDirectory/article"
 
 const router = express.Router();
 
-router.get("/show-all-articles",articlesController.showAllArticles);
-router.get("/show-article/:id",articlesController.showArticle);
+router.get("/get-all-articles",articlesController.getAllArticles);
+router.get('/get-articles-by-topic/:topic',articlesController.getArticlesByTopic);
+router.get("/get-article/:id",articlesController.getArticle);
 router.post("/add-article",
 [
     body("title")

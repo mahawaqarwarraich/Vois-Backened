@@ -69,6 +69,9 @@ app.use(multer({storage:storage, fileFilter:imageFilter}).single('picture'));
 const articleRoutes = require("./routes/ArticlesDirectory/article");
 app.use(articleRoutes);
 
+const articleTopicRoutes = require("./routes/ArticlesDirectory/article-topic");
+app.use(articleTopicRoutes);
+
 
                     //=======================//
 //==================//         END           //============================//

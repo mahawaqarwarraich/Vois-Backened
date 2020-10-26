@@ -1,13 +1,14 @@
 const { validationResult } = require("express-validator/check");
+const article = require("../../models/ArticlesDirectory/article");
 const Article = require("../../models/ArticlesDirectory/article");
 const helperFunctions = require("./helperFunctions");
 
-exports.showAllArticles = (req,res,next) => {
+exports.getAllArticles = (req,res,next) => {
     Article.find()
         .then(articles => {
             if (!articles) {
-                res.status(404).json({
-                    message: "Server failed to fetch articles",
+                res.status(422).json({
+                    message: "Server could not fetch articles",
                     articles: articles
                 });
             }
@@ -24,14 +25,38 @@ exports.showAllArticles = (req,res,next) => {
         });
 };
 
-exports.showArticle = (req,res,next) => {
+exports.getArticlesByTopic = (req,res,next) => {
+    const articleTopic = req.params.topic;
+
+    Article.find({Topic: articleTopic})
+        .then(articles => {
+            if (!articles) {
+                res.status(422).json({
+                    message: "Server could not fetch articles",
+                    articles: articles
+                });
+            }
+            res.status(200).json({
+                message: "Articles by topics fetched successfuly",
+                articles: articles
+            });
+        })
+        .catch(error => {
+            if (!error.statusCode) {
+                error.statusCode = 500;
+            }
+            next(error);
+        });
+};
+
+exports.getArticle = (req,res,next) => {
     const articleId = req.params.id;
 
     Article.findById(articleId)
         .then(article => {
             if(!article) {
-                res.status(404).json({
-                    message: "Server failed to fetch article",
+                res.status(422).json({
+                    message: "Server could not fetch the article",
                     article: article
                 });
             }
@@ -65,7 +90,7 @@ exports.addArticle = (req,res,next) => {
     const public_id = null;
 
     if (req.file) {
-        helperFunctions.uploadArticleCover(req.file.path)
+        helperFunctions.uploadArticleCover(req.file.path,"articles/")
             .then(result => {
                 console.log(result);
                 const secure_url = result.secure_url;
