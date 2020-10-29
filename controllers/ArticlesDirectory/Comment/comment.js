@@ -1,6 +1,12 @@
 const { validationResult } = require("express-validator/check");
 const Comment = require("../../../models/ArticlesDirectory/Comment/comment");
+const Reply = require("../../../models/ArticlesDirectory/Comment/reply");
 const Article = require("../article");
+
+
+exports.getBlogCommentsWithReplies = (req,res,next) => {
+    const articleId = req.params.articleId;
+}
 
 exports.addNewComment = (req,res,next) => {
     const errors = validationResult(req);

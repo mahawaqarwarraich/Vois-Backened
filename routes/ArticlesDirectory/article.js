@@ -9,7 +9,6 @@ router.get("/get-all-articles",articlesController.getAllArticles);
 router.get('/get-articles-by-topic/:topic',articlesController.getArticlesByTopic);
 router.get("/get-article/:id",articlesController.getArticle);
 router.post("/add-article",
-    isAuth,
     [
         body("title")
         .trim()
