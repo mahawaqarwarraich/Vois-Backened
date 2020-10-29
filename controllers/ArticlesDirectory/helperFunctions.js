@@ -30,14 +30,16 @@ const createNewArticleObject = (article) => {
                 Topic: article.topic,
                 PictureSecureId: article.secure_url,
                 PicturePublicId: article.public_id,
-                Body: article.body
+                Body: article.body,
+                Author: article.author
             }).save());
         }
         else {
             resolve(new Article({
                 Title: article.title,
                 Topic: article.topic,
-                Body: article.body
+                Body: article.body,
+                Author: article.author
             }).save());
         }
     });

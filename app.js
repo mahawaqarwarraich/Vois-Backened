@@ -72,6 +72,14 @@ app.use(articleRoutes);
 const articleTopicRoutes = require("./routes/ArticlesDirectory/article-topic");
 app.use(articleTopicRoutes);
 
+const authenticationRoutes = require("./routes/User/is-auth");
+app.use(authenticationRoutes);
+
+const commentRoutes = require("./routes/ArticlesDirectory/Comment/comment");
+app.use(commentRoutes);
+
+const replyRoutes = require("./routes/ArticlesDirectory/Comment/reply");
+app.use(replyRoutes);
 
                     //=======================//
 //==================//         END           //============================//

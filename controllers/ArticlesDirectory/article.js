@@ -1,5 +1,4 @@
 const { validationResult } = require("express-validator/check");
-const article = require("../../models/ArticlesDirectory/article");
 const Article = require("../../models/ArticlesDirectory/article");
 const helperFunctions = require("./helperFunctions");
 
@@ -86,6 +85,7 @@ exports.addArticle = (req,res,next) => {
     const title = req.body.title;
     const topic = req.body.topic;
     const body = req.body.body;
+    const author = req.userId;
     const secure_url = null;
     const public_id = null;
 
@@ -95,7 +95,7 @@ exports.addArticle = (req,res,next) => {
                 console.log(result);
                 const secure_url = result.secure_url;
                 const public_id = result.public_id;
-                return helperFunctions.createNewArticle(res,next,{title,topic,secure_url,public_id,body});
+                return helperFunctions.createNewArticle(res,next,{title,topic,secure_url,public_id,body,author});
             });
     }
     else {

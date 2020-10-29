@@ -1,35 +1,23 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const articleSchema = new Schema({
-    Title : {
-        type: String, 
-        required: true
+const commentSchema = new Schema({
+    Text: {
+        type: String,
+        minlength: 1
     },
-    Topic : {
-        type: String
-    },
-    PictureSecureId: {
-        type: String
-    },
-    PicturePublicId : {
-        type: String
-    },
-    PostedOn : {
+    PostedOn: {
         type: Date,
         default: Date.now
-    },
-    Body : {
-        type: String
     },
     Author: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     },
-    Comments : [
+    Replies: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Comment"
+            ref: "Reply"
         }
     ],
     Likes: [
@@ -40,4 +28,4 @@ const articleSchema = new Schema({
     ]
 });
 
-module.exports = mongoose.model('Article',articleSchema);
+module.exports = mongoose.model('Comment', commentSchema);

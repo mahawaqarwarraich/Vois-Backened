@@ -1,8 +1,6 @@
 const ArticleTopic = require ("../../models/ArticlesDirectory/article-topic");
 const helperFunctions = require ("./helperFunctions");
-
 const { validationResult } = require("express-validator/check");
-const article = require("../../models/ArticlesDirectory/article");
 
 
 exports.getArticleTopics = (req,res,next) => {
