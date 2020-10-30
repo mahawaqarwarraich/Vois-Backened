@@ -103,6 +103,118 @@ exports.addArticle = (req,res,next) => {
     }
 };
 
+exports.editArticle = (req,res,next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const error = new Error('Validation failed.');
+        error.statusCode = 422;
+        error.data = errors.array();
+        throw error;
+    }
+
+    const articleId = req.body.articleId;
+    Article.findById(articleId)
+        .then(article => {
+            if (!article) {
+                res.status(404).json({
+                    message: "Article not found"
+                });
+            }
+            if (article.Author != req.userId) {
+                return res.status(401).json({
+                    message: "Not Authorized!"
+                })
+            }
+            article.Title = req.body.title;
+            article.Topic = req.body.topic;
+            article.Body = req.body.body;
+            
+            return article.save();
+        })
+        .then(articleSaved => {
+            if (articleSaved) {
+                res.status(201).json({
+                    message: "Article Edited Successfully"
+                })
+            }
+        })
+        .catch(error => {
+            if (!error.statusCode) {
+                error.statusCode = 500;
+            }
+            next(error);
+        });
+};
+
+
+exports.deleteArticle = (req,res,next) => {
+    const articleId = req.body.articleId;
+    Article.findById(articleId)
+        .then(article => {
+            if (!article) {
+                res.status(404).json({
+                    message: "Article not found!"
+                })
+            }
+            if (article.Author == req.userId) {
+                return article.remove();
+            }
+            res.status(401).json({
+                message: "Not Authorized"
+            });
+        })
+        .then(articleRemoved => {
+            if (articleRemoved) {
+                res.status(200).json({
+                    message: "Article Successfully Removed"
+                })
+            }
+        })
+        .catch(error => {
+            if (!error.statusCode) {
+                error.statusCode = 500;
+            }
+            next(error);
+        });
+};
+
+exports.likeArticle = (req,res,next) => {
+    Article.findById(req.body.articleId)
+    .then(article => {
+        if (!article) {
+            return res.status(404).json({
+                message: "Article not found!"
+            })
+        }
+        let wasLiked;
+        article.Likes = article.Likes.filter(like => {
+            if (like == userId) {
+                wasLiked = true;
+            }
+            return like!=req.userId;
+        });
+        
+        if (!wasLiked) {
+            article.Likes.push(req.userId);
+        }
+        return article.save();
+    })
+    .then(likeStatusUpdated => {
+        if (likeStatusUpdated) {
+            res.status(200).json({
+                message: "Article Like Status Updated"
+            })
+        }
+    })
+    .catch(error => {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+    });
+};
+
+
 // const uploadArticleCover = path => {
 //     return new Promise ((resolve, reject) => {
 //         cloudinary.v2.uploader.upload(path,

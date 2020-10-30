@@ -4,9 +4,37 @@ const Reply = require("../../../models/ArticlesDirectory/Comment/reply");
 const Article = require("../article");
 
 
-exports.getBlogCommentsWithReplies = (req,res,next) => {
+
+exports.getArticleCommentsWithReplies = (req,res,next) => {
     const articleId = req.params.articleId;
-}
+    let articleComments = [];
+    Article.findById(articleId)
+        .then(article => {
+            if (!article) {
+                res.status(404).json({
+                    message: "Article not found"
+                })
+            }
+            return article.populate('Comments')
+                .populate('Author')
+                .execPopulate();
+        })
+        .then(articleWithCommentsPopulated => {
+            articleWithCommentsPopulated.Comments.forEach(comment => {
+                articleComments.push({text:comment.Text,postedOn: comment.postedOn,author: comment.Author.Username});
+            });
+            return res.status(200).json({
+                message: "Comments fetched successfully",
+                comments: articleComments
+            })
+        })
+        .catch(error => {
+            if (!error.statusCode) {
+                error.statusCode = 500;
+            }
+            next(error);
+        });
+};
 
 exports.addNewComment = (req,res,next) => {
     const errors = validationResult(req);
@@ -24,8 +52,8 @@ exports.addNewComment = (req,res,next) => {
     Article.findById(articleId)
         .then(article => {
             if (!article) {
-                res.status(422).json({
-                    message: "Server could not process the article"
+                res.status(404).json({
+                    message: "Article Not found!"
                 })
             }
             article = article;
@@ -55,13 +83,123 @@ exports.addNewComment = (req,res,next) => {
         });
 };
 
-exports.deleteComment = (req,res,next) => {
+exports.deleteComment = (req, res, next) => {
+    let article;
+    let comment;
+    Article.findById(req.body.articleId)
+        .then(article => {
+            if (!article) {
+                return res.status(404).json({
+                    message: "Article not found!"
+                })
+            }
+            article = article;
+            return Comment.findById(req.body.commentId);
+        })
+        .then(comment => {
+            if (!comment) {
+                return res.status(404).json({
+                    message: "Comment not found!"
+                })
+            }
+            comment = comment;
+            if (comment.Author == req.userId) {
+                article.Comments = article.Comments.filter(comment => {
+                    return comment != commentId;
+                })
+            }
+            else {
+                return res.status(401).json({
+                    message: "Not Authorized"
+                });
+            }
+            return article.save();
+        })
+        .then(articleSaved => {
+            if (articleSaved) {
+                return comment.remove();
+            }
+        })
+        .then (commentRemoved => {
+            if (commentRemoved) {
+                res.status(200).json({
+                    message: "Comment Successuly Deleted!"
+                })
+            }
+        })
+        .catch(error => {
+            if (!error.statusCode) {
+                error.statusCode = 500;
+            }
+            next(error);
+        });
+        
 };
 
-exports.editComment = (req,res,next) => {
-
+exports.editComment = (req, res, next) => {
+        Comment.findById(req.body.commentId)
+        .then(comment => {
+            if (!comment) {
+                return res.status(404).json({
+                    message: "Comment not found"
+                });
+            } else {
+                if (comment.Author == req.userId) {
+                    comment.Text = req.body.updatedText;
+                    return comment.save();
+                }
+                return res.status(401).json({
+                    message: "Not Authorized"
+                });
+            }
+        })
+        .then(commentSaved => {
+            if (commentSaved) {
+                return res.status(200).json({
+                    message: "Comment edited successfully"
+                });
+            }
+        })
+        .catch(error => {
+            if (!error.statusCode) {
+                error.statusCode = 500;
+            }
+            next(error);
+        });
 };
 
 exports.likeComment = (req,res,next) => {
-
+    Comment.findById(req.body.commentId)
+        .then(comment => {
+            if (!comment) {
+                return res.status(404).json({
+                    message: "Comment not found!"
+                })
+            }
+            let wasLiked;
+            comment.Likes = comment.Likes.filter(like => {
+                if (like == userId) {
+                    wasLiked = true;
+                }
+                return like!=req.userId;
+            });
+            
+            if (!wasLiked) {
+                comment.Likes.push(req.userId);
+            }
+            return comment.save();
+        })
+        .then(likeStatusUpdated => {
+            if (likeStatusUpdated) {
+                res.status(200).json({
+                    message: "Comment Like Status Updated"
+                })
+            }
+        })
+        .catch(error => {
+            if (!error.statusCode) {
+                error.statusCode = 500;
+            }
+            next(error);
+        });
 };

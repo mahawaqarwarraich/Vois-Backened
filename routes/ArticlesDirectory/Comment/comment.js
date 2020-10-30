@@ -5,6 +5,8 @@ const commentController = require("../../../controllers/ArticlesDirectory/Commen
 const router = express.Router();
 
 
+router.get("/get-blog-comments", commentController.getArticleCommentsWithReplies);
+
 router.post("/comment/add-new",
     isAuth,
     [

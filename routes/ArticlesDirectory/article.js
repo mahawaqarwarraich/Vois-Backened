@@ -2,6 +2,7 @@ const express = require("express");
 const { body } = require("express-validator/check");
 const isAuth = require("../../middleware/is-auth");
 const articlesController = require("../../controllers/ArticlesDirectory/article");
+const article = require("../../models/ArticlesDirectory/article");
 
 const router = express.Router();
 
@@ -18,6 +19,19 @@ router.post("/add-article",
         .not()
         .isEmpty()
     ],articlesController.addArticle);
+
+router.delete("/delete-article",articlesController.deleteArticle);
+router.put("/edit-article",
+[
+    body("title")
+    .trim()
+    .not()
+    .isEmpty(),
+    body("body")
+    .not()
+    .isEmpty()
+],articlesController.editArticle);
+router.post("/like-article",articlesController.likeArticle);
 
 
 
