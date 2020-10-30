@@ -99,7 +99,7 @@ exports.addArticle = (req,res,next) => {
             });
     }
     else {
-        return helperFunctions.createNewArticle(res,next,{title,topic,secure_url,public_id,body});
+        return helperFunctions.createNewArticle(res,next,{title,topic,secure_url,public_id,body,author});
     }
 };
 
@@ -188,7 +188,7 @@ exports.likeArticle = (req,res,next) => {
         }
         let wasLiked;
         article.Likes = article.Likes.filter(like => {
-            if (like == userId) {
+            if (like == req.userId) {
                 wasLiked = true;
             }
             return like!=req.userId;
