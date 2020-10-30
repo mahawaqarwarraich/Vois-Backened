@@ -10,6 +10,7 @@ router.get("/get-all-articles",articlesController.getAllArticles);
 router.get('/get-articles-by-topic/:topic',articlesController.getArticlesByTopic);
 router.get("/get-article/:id",articlesController.getArticle);
 router.post("/add-article",
+    isAuth,
     [
         body("title")
         .trim()
@@ -20,18 +21,21 @@ router.post("/add-article",
         .isEmpty()
     ],articlesController.addArticle);
 
-router.delete("/delete-article",articlesController.deleteArticle);
+router.delete("/delete-article",
+    isAuth,articlesController.deleteArticle);
 router.put("/edit-article",
-[
-    body("title")
-    .trim()
-    .not()
-    .isEmpty(),
-    body("body")
-    .not()
-    .isEmpty()
-],articlesController.editArticle);
-router.post("/like-article",articlesController.likeArticle);
+    isAuth,
+    [
+        body("title")
+        .trim()
+        .not()
+        .isEmpty(),
+        body("body")
+        .not()
+        .isEmpty()
+    ],articlesController.editArticle);
+router.post("/like-article",
+    isAuth,articlesController.likeArticle);
 
 
 
