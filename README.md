@@ -33,6 +33,16 @@ BeMyHand is currently in development. Users can use text editor to write the art
 
 ## Implementation Details
 
+The backend is implemented using RESTful architecture and it acts as a web service for our client accessing it with the well defined end points.
+
+<img src="https://user-images.githubusercontent.com/38074593/102647549-b8197a80-4187-11eb-82d4-037d46bcb1ae.jpg" width=480 height=300>
+
+We have routes, controllers and models to define endpoints, implement business logic and define schema respectively. This ensures a complete modular code with well defined folder and file names.
+
+### `Validation and Security`
+We have ensured to validate the payload sent to the endpoints before entering into the controllers and this saves a lot of time and saves our application from entering into unusual state. 
+Moreover, we have also ensured security and have made use of JSON Web Tokens to transmit sensitive information between client and server.
+
 
 
 
