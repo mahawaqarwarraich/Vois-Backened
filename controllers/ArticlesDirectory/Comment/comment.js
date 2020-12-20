@@ -1,40 +1,70 @@
 const { validationResult } = require("express-validator/check");
 const Comment = require("../../../models/ArticlesDirectory/Comment/comment");
 const Reply = require("../../../models/ArticlesDirectory/Comment/reply");
-const Article = require("../article");
+const Article = require("../../../models/ArticlesDirectory/article");
+const User = require("../../../models/User/user");
 
 
 
-exports.getArticleCommentsWithReplies = (req,res,next) => {
+// exports.getArticleCommentsWithReplies = (req,res,next) => {
+//     const articleId = req.params.articleId;
+//     let articleComments = [];
+//     Article.findById(articleId)
+//         .then(article => {
+//             if (!article) {
+//                 res.status(404).json({
+//                     message: "Article not found"
+//                 })
+//             }
+//             article.populate('Comments')
+//                 .execPopulate();
+//         })
+//         .then(populatedArticle => {
+//             return populatedArticle.Comments;
+//         })
+//         .then(onlyComments => {
+//             console.log(onlyComments);
+//         })
+//         .then(articleWithCommentsPopulated => {
+//             articleWithCommentsPopulated.Comments.forEach(comment => {
+//                 articleComments.push({text:comment.Text,postedOn: comment.postedOn,author: comment.Author.Username, replies:comment.Replies});
+//             });
+//             return res.status(200).json({
+//                 message: "Comments fetched successfully",
+//                 comments: articleComments
+//             })
+//         })
+//         .catch(error => {
+//             if (!error.statusCode) {
+//                 error.statusCode = 500;
+//             }
+//             next(error);
+//         });
+// };
+
+
+exports.getArticleCommentsWithReplies = async (req,res,next) => {
     const articleId = req.params.articleId;
-    let articleComments = [];
-    Article.findById(articleId)
-        .then(article => {
-            if (!article) {
-                res.status(404).json({
-                    message: "Article not found"
-                })
-            }
-            return article.populate('Comments')
-                .populate('Author')
-                .execPopulate();
-        })
-        .then(articleWithCommentsPopulated => {
-            articleWithCommentsPopulated.Comments.forEach(comment => {
-                articleComments.push({text:comment.Text,postedOn: comment.postedOn,author: comment.Author.Username});
-            });
-            return res.status(200).json({
-                message: "Comments fetched successfully",
-                comments: articleComments
-            })
-        })
-        .catch(error => {
-            if (!error.statusCode) {
-                error.statusCode = 500;
-            }
-            next(error);
-        });
-};
+
+    articleComments = await Article.findById(articleId)
+        .populate([
+            {
+            path: "Comments",
+            model: "Comment",
+            populate: {
+                path: 'Author',
+                model: 'User',
+                select: "Username Email _id",
+              }
+            },
+        ]);
+
+    res.status(200).json({
+        message: "Comments fetched successfully",
+        comments: articleComments.Comments
+    });
+}
+
 
 exports.addNewComment = (req,res,next) => {
     const errors = validationResult(req);
@@ -48,7 +78,7 @@ exports.addNewComment = (req,res,next) => {
     const commentText = req.body.text;
     const articleId      = req.body.articleId;
 
-    let article, newComment;
+    let loadedArticle, newComment;
     Article.findById(articleId)
         .then(article => {
             if (!article) {
@@ -56,7 +86,7 @@ exports.addNewComment = (req,res,next) => {
                     message: "Article Not found!"
                 })
             }
-            article = article;
+            loadedArticle = article;
             return new Comment({
                 Text: commentText,
                 Author: req.userId
@@ -65,8 +95,8 @@ exports.addNewComment = (req,res,next) => {
         .then(newComment => {
             if (newComment) {
                 newComment = newComment;
-                article.Comments.push(newComment);
-                return article.save();
+                loadedArticle.Comments.push(newComment);
+                return loadedArticle.save();
             }
         })
         .then(savedArticleWithComment => {
@@ -84,8 +114,8 @@ exports.addNewComment = (req,res,next) => {
 };
 
 exports.deleteComment = (req, res, next) => {
-    let article;
-    let comment;
+    let loadedArticle;
+    let loadedComment;
     Article.findById(req.body.articleId)
         .then(article => {
             if (!article) {
@@ -93,7 +123,7 @@ exports.deleteComment = (req, res, next) => {
                     message: "Article not found!"
                 })
             }
-            article = article;
+            loadedArticle = article;
             return Comment.findById(req.body.commentId);
         })
         .then(comment => {
@@ -102,10 +132,10 @@ exports.deleteComment = (req, res, next) => {
                     message: "Comment not found!"
                 })
             }
-            comment = comment;
-            if (comment.Author == req.userId) {
-                article.Comments = article.Comments.filter(comment => {
-                    return comment != commentId;
+            loadedComment = comment;
+            if (loadedComment.Author == req.userId) {
+                loadedArticle.Comments = loadedArticle.Comments.filter(comment => {
+                    return comment != req.body.commentId;
                 })
             }
             else {
@@ -113,11 +143,11 @@ exports.deleteComment = (req, res, next) => {
                     message: "Not Authorized"
                 });
             }
-            return article.save();
+            return loadedArticle.save();
         })
         .then(articleSaved => {
             if (articleSaved) {
-                return comment.remove();
+                return loadedComment.remove();
             }
         })
         .then (commentRemoved => {
@@ -178,7 +208,7 @@ exports.likeComment = (req,res,next) => {
             }
             let wasLiked;
             comment.Likes = comment.Likes.filter(like => {
-                if (like == userId) {
+                if (like == req.userId) {
                     wasLiked = true;
                 }
                 return like!=req.userId;

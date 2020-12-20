@@ -31,7 +31,16 @@ const createNewArticleObject = (article) => {
                 PictureSecureId: article.secure_url,
                 PicturePublicId: article.public_id,
                 Body: article.body,
-                Author: article.author
+                Author: {id:article.author, authorName: article.authorName}
+            }).save());
+        }
+        else if (article.secure_url && !article.public_id) {
+            resolve(new Article({
+                Title: article.title,
+                Topic: article.topic,
+                PictureSecureId: article.secure_url,
+                Body: article.body,
+                Author: {id:article.author, authorName: article.authorName}
             }).save());
         }
         else {
@@ -39,7 +48,7 @@ const createNewArticleObject = (article) => {
                 Title: article.title,
                 Topic: article.topic,
                 Body: article.body,
-                Author: article.author
+                Author: {id:article.author, authorName: article.authorName}
             }).save());
         }
     });

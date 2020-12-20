@@ -6,8 +6,8 @@ exports.getAllArticles = (req,res,next) => {
     Article.find()
         .then(articles => {
             if (!articles) {
-                res.status(422).json({
-                    message: "Server could not fetch articles",
+                res.status(404).json({
+                    message: "No Articles Found",
                     articles: articles
                 });
             }
@@ -24,14 +24,273 @@ exports.getAllArticles = (req,res,next) => {
         });
 };
 
+
+
+exports.getFavArticles = (req,res,next) => {
+    Article.find()
+        .then(articles => {
+            if (!articles) {
+                res.status(404).json({
+                    message: "No Articles Found",
+                    articles: articles
+                });
+            }
+
+            favArticles = articles.map(article => {
+                let isArticleFav = false;
+                article.Likes.forEach(like => {
+                    if (like == req.userId) {
+                        isArticleFav = true;
+                    }
+                });
+
+                if (isArticleFav) {
+                    return article;
+                }
+                return false;
+            });
+
+            return favArticles.filter(favArticle => {
+                if (favArticle!=null) {
+                    return favArticle;
+                }
+            });
+        })
+        .then(result => {
+            res.status(200).json({
+                message: "Fav Articles Fetched",
+                favArticles: result
+            });
+        })
+        .catch(err => {
+            if (!err.statusCode) {
+                error.statusCode = 500;
+            }
+            next(err);
+        });
+}
+
+
+exports.getLatestFavArticles = (req,res,next) => {
+    Article.find()
+        .then(articles => {
+            if (!articles) {
+                res.status(404).json({
+                    message: "No Articles Found",
+                    articles: articles
+                });
+            }
+
+            favArticles = articles.map(article => {
+                let isArticleFav = false;
+                article.Likes.forEach(like => {
+                    if (like == req.userId) {
+                        isArticleFav = true;
+                    }
+                });
+
+                if (isArticleFav) {
+                    return article;
+                }
+                return false;
+            });
+
+            return favArticles.filter(favArticle => {
+                if (favArticle!=null) {
+                    return favArticle;
+                }
+            });
+        })
+        .then (favArticles => {
+            if (favArticles.length >3) {
+                return [favArticles[0],favArticles[1],favArticles[2]]
+            } 
+            return favArticles;
+        })
+        .then(result => {
+            res.status(200).json({
+                message: "Latest Favourite Articles Fetched",
+                favArticles: result
+            });
+        })
+        .catch(err => {
+            if (!err.statusCode) {
+                error.statusCode = 500;
+            }
+            next(err);
+        });
+}
+
+
+exports.getMyBlogs = (req,res,next) => {
+    Article.find()
+        .then(articles => {
+            if (!articles) {
+                res.status(404).json({
+                    message: "No Articles Found For this User",
+                    articles: articles
+                });
+            }
+            articles = articles.filter(article => {
+                return article.Author.id == req.userId;
+            });
+            res.status(200).json({
+                message: "Articles created by current user fetched successfuly",
+                articles: articles
+            });
+        })
+        .catch(error => {
+            if (!error.statusCode) {
+                error.statusCode = 500;
+            }
+            next(error);
+        });
+}
+
+
+exports.getUserLatestArticles = (req,res,next) => {
+
+    const userId = req.params.userId;
+    Article.find()
+        .sort({ _id: -1 })
+        .limit(4)
+        .then(articles => {
+            if (!articles) {
+                res.status(404).json({
+                    message: "No Articles Found For this User",
+                    articles: articles
+                });
+            }
+            console.log(articles);
+            articles = articles.filter(article => {
+                return article.Author.id == userId;
+            });
+            res.status(200).json({
+                message: "Latest articles created by current user fetched successfuly",
+                articles: articles
+            });
+        })
+        .catch(error => {
+            if (!error.statusCode) {
+                error.statusCode = 500;
+            }
+            next(error);
+        });
+}
+
+exports.getAllUserArticles = (req,res,next) => {
+    const userId = req.params.userId;
+    Article.find()
+        .sort({ _id: -1 })
+        .then(articles => {
+            if (!articles) {
+                res.status(404).json({
+                    message: "No Articles Found For this User",
+                    articles: articles
+                });
+            }
+            console.log(articles);
+            articles = articles.filter(article => {
+                return article.Author.id == userId;
+            });
+            res.status(200).json({
+                message: "Latest articles created by current user fetched successfuly",
+                articles: articles
+            });
+        })
+        .catch(error => {
+            if (!error.statusCode) {
+                error.statusCode = 500;
+            }
+            next(error);
+        });
+}
+
 exports.getArticlesByTopic = (req,res,next) => {
     const articleTopic = req.params.topic;
 
     Article.find({Topic: articleTopic})
         .then(articles => {
             if (!articles) {
-                res.status(422).json({
-                    message: "Server could not fetch articles",
+                res.status(404).json({
+                    message: "There are no articles for this topic",
+                    articles: articles
+                });
+            }
+            res.status(200).json({
+                message: "Articles by topics fetched successfuly",
+                articles: articles
+            });
+        })
+        .catch(error => {
+            if (!error.statusCode) {
+                error.statusCode = 500;
+            }
+            next(error);
+        });
+};
+
+exports.getUserArticlesByTopic = (req,res,next) => {
+    const articleTopic = req.params.topic;
+    const userId = req.params.id;
+
+    Article.find({Topic: articleTopic})
+        .then(articles => {
+            if (!articles) {
+                res.status(404).json({
+                    message: "There are no articles for this topic",
+                    articles: articles
+                });
+            }
+            articles = articles.filter(article => {
+                return article.Author.id == userId;
+            });
+            res.status(200).json({
+                message: "Articles by topics fetched successfuly",
+                articles: articles
+            });
+        })
+        .catch(error => {
+            if (!error.statusCode) {
+                error.statusCode = 500;
+            }
+            next(error);
+        });
+};
+
+exports.getLatestArticles = (req,res,next) => {
+    Article.find()
+        .sort({ _id: -1 })
+        .limit(3)
+        .then(articles => {
+            if (!articles) {
+                res.status(404).json({
+                    message: "No Articles Yet",
+                });
+            }
+            res.status(200).json({
+                message: "Latest articles fetched successfully",
+                articles : articles
+            })
+        })
+        .catch(error=> {
+            if (!error.statusCode) {
+                error.statusCode = 500;
+            }
+            next(error);
+        })
+}
+
+exports.getLatestArticlesByTopic = (req,res,next) => {
+    const articleTopic = req.params.topic;
+
+    Article.find({Topic: articleTopic})
+        .sort({ _id: -1 })
+        .limit(4)
+        .then(articles => {
+            if (!articles) {
+                res.status(404).json({
+                    message: "There are no articles for this topic",
                     articles: articles
                 });
             }
@@ -54,8 +313,8 @@ exports.getArticle = (req,res,next) => {
     Article.findById(articleId)
         .then(article => {
             if(!article) {
-                res.status(422).json({
-                    message: "Server could not fetch the article",
+                res.status(404).json({
+                    message: "Article Not Found",
                     article: article
                 });
             }
@@ -86,6 +345,8 @@ exports.addArticle = (req,res,next) => {
     const topic = req.body.topic;
     const body = req.body.body;
     const author = req.userId;
+    const authorName = req.username;
+    const imgUrl = req.body.link;
     const secure_url = null;
     const public_id = null;
 
@@ -95,11 +356,12 @@ exports.addArticle = (req,res,next) => {
                 console.log(result);
                 const secure_url = result.secure_url;
                 const public_id = result.public_id;
-                return helperFunctions.createNewArticle(res,next,{title,topic,secure_url,public_id,body,author});
+                return helperFunctions.createNewArticle(res,next,{title,topic,secure_url,public_id,body,author,authorName});
             });
     }
     else {
-        return helperFunctions.createNewArticle(res,next,{title,topic,secure_url,public_id,body,author});
+        secure_url = imgUrl;
+        return helperFunctions.createNewArticle(res,next,{title,topic,secure_url,public_id,body,author,authorName});
     }
 };
 
@@ -213,81 +475,3 @@ exports.likeArticle = (req,res,next) => {
         next(error);
     });
 };
-
-
-// const uploadArticleCover = path => {
-//     return new Promise ((resolve, reject) => {
-//         cloudinary.v2.uploader.upload(path,
-//             { folder: "articles/",type:"private"},
-//             (error,result)=>{
-//                 if (error) {
-//                     reject(error);
-//                 }
-//                 else {
-//                     resolve(result);
-//                 }
-//             });
-//     });
-// }
-//
-// exports.addArticle = (req,res,next) => {
-//     const errors = validationResult(req);
-// 	if (!errors.isEmpty()) {
-// 		const error = new Error('Validation failed.');
-// 		error.statusCode = 422;
-// 		error.data = errors.array();
-// 		throw error;
-//     }
-//
-// 	const title = req.body.title;
-// 	const topic = req.body.topic;
-// 	const body = req.body.body;
-//
-//     if (req.file) {
-//         uploadArticleCover(req.file.path)
-//             .then(result => {
-//                 console.log(result);
-//                 return result;
-//             })
-//             .then (result => {
-//                 return new Article({
-//                     Title: title,
-//                     Topic: topic,
-//                     PictureSecureId: result.secure_url,
-//                     PicturePublicId: result.public_id,
-//                     Body: body
-//                 }).save()
-//             })
-//             .then (newArticle => {
-//                 return res.status(201).json({
-//                     message: "New Article Created Successfully",
-//                     article : newArticle
-//                 });
-//             })
-//             .catch(error => {
-//                 if (!error.statusCode) {
-//                     error.statusCode = 500;
-//                 }
-//                 next(error);
-//             });
-//     }
-//     else {
-//         return new Article({
-//             Title: title,
-//             Topic: topic,
-//             // PictureSecureId: result.secure_url,
-//             // PicturePublicId: result.public_id,
-//             Body: body
-//         }).save().then (newArticle => {
-//             return res.status(201).json({
-//                 message: "New Article Created Successfully",
-//                 article : newArticle
-//             });
-//         }).catch(error => {
-//             if (!error.statusCode) {
-//                 error.statusCode = 500;
-//             }
-//             next(error);
-//         });
-//     }
-// };
