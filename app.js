@@ -87,8 +87,8 @@ app.use(replyRoutes);
 
 
                 
-const MONGODB_URI = "mongodb://Muzamil:password123@ds137957.mlab.com:37957/bemyhand";
-
+// const MONGODB_URI = "mongodb://Muzamil:password123@ds137957.mlab.com:37957/bemyhand";
+const MONGODB_URI = "mongodb://admin:rKp0gAoByvmdNcAr@cluster0-shard-00-00.1ddwl.mongodb.net:27017,cluster0-shard-00-01.1ddwl.mongodb.net:27017,cluster0-shard-00-02.1ddwl.mongodb.net:27017/BeMyHand?ssl=true&replicaSet=atlas-a0vxl9-shard-0&authSource=admin&retryWrites=true&w=majority";
 mongoose
     .connect(MONGODB_URI)
     .then(result => {
