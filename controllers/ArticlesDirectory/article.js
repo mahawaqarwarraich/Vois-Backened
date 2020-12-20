@@ -148,7 +148,9 @@ exports.getMyBlogs = (req,res,next) => {
 }
 
 
-exports.getMyLatestBlogs = (req,res,next) => {
+exports.getUserLatestArticles = (req,res,next) => {
+
+    const userId = req.params.userId;
     Article.find()
         .sort({ _id: -1 })
         .limit(4)
@@ -161,7 +163,35 @@ exports.getMyLatestBlogs = (req,res,next) => {
             }
             console.log(articles);
             articles = articles.filter(article => {
-                return article.Author.id == req.userId;
+                return article.Author.id == userId;
+            });
+            res.status(200).json({
+                message: "Latest articles created by current user fetched successfuly",
+                articles: articles
+            });
+        })
+        .catch(error => {
+            if (!error.statusCode) {
+                error.statusCode = 500;
+            }
+            next(error);
+        });
+}
+
+exports.getAllUserArticles = (req,res,next) => {
+    const userId = req.params.userId;
+    Article.find()
+        .sort({ _id: -1 })
+        .then(articles => {
+            if (!articles) {
+                res.status(404).json({
+                    message: "No Articles Found For this User",
+                    articles: articles
+                });
+            }
+            console.log(articles);
+            articles = articles.filter(article => {
+                return article.Author.id == userId;
             });
             res.status(200).json({
                 message: "Latest articles created by current user fetched successfuly",
@@ -316,6 +346,7 @@ exports.addArticle = (req,res,next) => {
     const body = req.body.body;
     const author = req.userId;
     const authorName = req.username;
+    const imgUrl = req.body.link;
     const secure_url = null;
     const public_id = null;
 
@@ -329,6 +360,7 @@ exports.addArticle = (req,res,next) => {
             });
     }
     else {
+        secure_url = imgUrl;
         return helperFunctions.createNewArticle(res,next,{title,topic,secure_url,public_id,body,author,authorName});
     }
 };

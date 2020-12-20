@@ -23,7 +23,9 @@ router.get("/get-latest-fav-articles",isAuth,articlesController.getLatestFavArti
 
 router.get("/get-my-blogs",isAuth,articlesController.getMyBlogs);
 
-router.get("/get-my-latest-blogs",isAuth,articlesController.getMyLatestBlogs);
+router.get("/get-all-user-articles/:userId",articlesController.getAllUserArticles);
+
+router.get("/get-user-latest-articles/:userId",articlesController.getUserLatestArticles);
 
 
 router.post("/add-article",isAuth,

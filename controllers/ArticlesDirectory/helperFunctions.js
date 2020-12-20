@@ -34,6 +34,15 @@ const createNewArticleObject = (article) => {
                 Author: {id:article.author, authorName: article.authorName}
             }).save());
         }
+        else if (article.secure_url && !article.public_id) {
+            resolve(new Article({
+                Title: article.title,
+                Topic: article.topic,
+                PictureSecureId: article.secure_url,
+                Body: article.body,
+                Author: {id:article.author, authorName: article.authorName}
+            }).save());
+        }
         else {
             resolve(new Article({
                 Title: article.title,
