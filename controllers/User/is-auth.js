@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const User = require('../../models/User/user');
+const Profile = require('../../models/User/profile');
 
 exports.userSignUp = (req, res, next) => {
 	const errors = validationResult(req);
@@ -10,18 +11,31 @@ exports.userSignUp = (req, res, next) => {
 		const error = new Error('Validation failed.');
 		error.statusCode = 422;
 		error.data = errors.array();
+		console.log(error.data);
 		throw error;
 	}
     const username = req.body.username;
     const email    = req.body.email;
 	const password = req.body.password;
+	let hashedPassword = null;
 	bcrypt
 		.hash(password, 12)
 		.then((hashedPw) => {
+
+			hashedPassword = hashedPw;
+			const profile = new Profile({
+				PersonalDescription: "No Description Added Yet",
+				ProfilePhotoSecureId : "https://i.pinimg.com/736x/43/30/da/4330da45e2f3a808092cced2543b35c5.jpg",
+				ProfilePhotoPublicId : null
+			});
+			return profile.save();
+		})
+		.then(userProfileSaved => {
 			const user = new User({
                 Username: username,
                 Email   : email,
-				Password: hashedPw
+				Password: hashedPassword,
+				Profile: userProfileSaved._id
 			});
 			return user.save();
 		})
@@ -59,7 +73,7 @@ exports.userLogin = (req, res, next) => {
 			}
 			const token = jwt.sign(
 				{
-					name: loadedUser.Name,
+					name: loadedUser.Username,
 					userId: loadedUser._id.toString(),
 				},
 				'Thisisasecret-password-tercesasisihT',
@@ -68,6 +82,7 @@ exports.userLogin = (req, res, next) => {
 			res.status(200).json({
 				token: token,
 				username: loadedUser.Username,
+				userId: loadedUser._id.toString()
 			});
 		})
 		.catch((err) => {

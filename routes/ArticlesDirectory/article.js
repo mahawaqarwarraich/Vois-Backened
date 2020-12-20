@@ -9,9 +9,24 @@ router.get("/get-all-articles",articlesController.getAllArticles);
 
 router.get('/get-articles-by-topic/:topic',articlesController.getArticlesByTopic);
 
+router.get('/get-articles-by-topic/:topic/:id',articlesController.getUserArticlesByTopic); 
+
+router.get('/get-latest-articles',articlesController.getLatestArticles);
+
+router.get('/get-latest-articles/:topic',articlesController.getLatestArticlesByTopic);
+
 router.get("/get-article/:id",articlesController.getArticle);
 
-router.post("/add-article",
+router.get("/get-fav-articles",isAuth,articlesController.getFavArticles);
+
+router.get("/get-latest-fav-articles",isAuth,articlesController.getLatestFavArticles);
+
+router.get("/get-my-blogs",isAuth,articlesController.getMyBlogs);
+
+router.get("/get-my-latest-blogs",isAuth,articlesController.getMyLatestBlogs);
+
+
+router.post("/add-article",isAuth,
     [
         body("title")
         .trim()
@@ -22,9 +37,9 @@ router.post("/add-article",
         .isEmpty()
     ],articlesController.addArticle);
 
-router.delete("/delete-article",articlesController.deleteArticle);
+router.delete("/delete-article",isAuth,articlesController.deleteArticle);
 
-router.put("/edit-article",
+router.put("/edit-article",isAuth,
     [
         body("title")
         .trim()
@@ -35,7 +50,8 @@ router.put("/edit-article",
         .isEmpty()
     ],articlesController.editArticle);
 
-router.post("/like-article",articlesController.likeArticle);
+router.post("/like-article",isAuth,articlesController.likeArticle);
+
 
 
 

@@ -31,7 +31,7 @@ const createNewArticleObject = (article) => {
                 PictureSecureId: article.secure_url,
                 PicturePublicId: article.public_id,
                 Body: article.body,
-                Author: article.author
+                Author: {id:article.author, authorName: article.authorName}
             }).save());
         }
         else {
@@ -39,7 +39,7 @@ const createNewArticleObject = (article) => {
                 Title: article.title,
                 Topic: article.topic,
                 Body: article.body,
-                Author: article.author
+                Author: {id:article.author, authorName: article.authorName}
             }).save());
         }
     });
