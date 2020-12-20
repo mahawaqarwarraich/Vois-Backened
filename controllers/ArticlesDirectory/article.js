@@ -347,7 +347,7 @@ exports.addArticle = (req,res,next) => {
     const author = req.userId;
     const authorName = req.username;
     const imgUrl = req.body.link;
-    const secure_url = null;
+    let secure_url = null;
     const public_id = null;
 
     if (req.file) {
