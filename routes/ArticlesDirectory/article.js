@@ -27,6 +27,10 @@ router.get("/get-all-user-articles/:userId",articlesController.getAllUserArticle
 
 router.get("/get-user-latest-articles/:userId",articlesController.getUserLatestArticles);
 
+router.post('/search-articles-by-topic',articlesController.searchArticlesByTopic);
+
+router.post('/search-all-articles',articlesController.searchAllArticles);
+
 
 router.post("/add-article",isAuth,
     [

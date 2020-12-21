@@ -331,6 +331,76 @@ exports.getArticle = (req,res,next) => {
         })
 };
 
+exports.searchArticlesByTopic = (req,res,next) => {
+    const keyword = req.body.keyword;
+    const topic = req.body.topic;
+
+    Article.find({
+        $or: [{Title: {
+            $regex: new RegExp(keyword,  "i")
+        }},
+        {Body: {
+            $regex: new RegExp(keyword,  "i")
+        }},
+        {"Author.authorName": {
+            $regex: new RegExp(keyword,  "i")
+        }}],
+        Topic:
+            // $regex: new RegExp(keyword)
+            topic
+    }, {
+        _id:0,
+        __v:0
+    })
+    // .collation( { locale: 'en', strength: 2 } )
+    .then(articles => {
+        res.status(200).json({
+            message: "Articles fetched",
+            articles: articles
+        })
+    })
+    .catch(err => {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    });
+};
+
+exports.searchAllArticles = (req,res,next) => {
+    const keyword = req.body.keyword;
+
+    Article.find({
+        $or: [{Title: {
+            $regex: new RegExp(keyword,  "i")
+        }},
+        {Body: {
+            $regex: new RegExp(keyword,  "i")
+        }},
+        {"Author.authorName": {
+            $regex: new RegExp(keyword,  "i")
+        }},
+        {Topic: {
+            $regex: new RegExp(keyword,  "i")
+        }}],
+    }, {
+        _id:0,
+        __v:0
+    })
+    // .collation( { locale: 'en', strength: 2 } )
+    .then(articles => {
+        res.status(200).json({
+            message: "Articles fetched",
+            articles: articles
+        })
+    })
+    .catch(err => {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    });
+};
 
 exports.addArticle = (req,res,next) => {
     const errors = validationResult(req);
