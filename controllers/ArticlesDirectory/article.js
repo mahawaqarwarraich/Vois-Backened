@@ -1,6 +1,7 @@
 const { validationResult } = require("express-validator/check");
 const Article = require("../../models/ArticlesDirectory/article");
 const ArticleVersionHistory = require("../../models/ArticlesDirectory/article-history");
+const { addNewComment } = require("./Comment/comment");
 const helperFunctions = require("./helperFunctions");
 
 exports.getAllArticles = (req,res,next) => {
@@ -452,6 +453,9 @@ exports.editArticle = (req,res,next) => {
     let secure_url = req.body.secure_url;
     const public_id = req.body.public_id;
 
+
+    let storeFoundArticle;
+
     Article.findById(articleId)
     .then (foundArticle => {
         if (!foundArticle) {
@@ -464,6 +468,23 @@ exports.editArticle = (req,res,next) => {
                 message: "Not Authorized!"
             })
         }
+        storeFoundArticle = foundArticle;
+
+       return ArticleVersionHistory.findById(articleId);
+
+    })
+    .then(foundArticleVersionHistory => {
+        if (!foundArticleVersionHistory) {
+            return new ArticleVersionHistory({
+                _id: articleId
+            }).save();
+        }
+        return foundArticleVersionHistory;
+    })
+    .then(foundArticleVersionHistory=> {
+
+        foundArticleVersionHistory.Version_History.push({article: {}});
+        foundArticleVersionHistory.save();
 
         if (req.file) {
             helperFunctions.uploadArticleCover(req.file.path,"articles/")
@@ -471,15 +492,38 @@ exports.editArticle = (req,res,next) => {
                     console.log(result);
                     const secure_url = result.secure_url;
                     const public_id = result.public_id;
-                    return helperFunctions.EditArticle(res,next,foundArticle,{title,topic,secure_url,public_id,body,author,authorName});
+                    return helperFunctions.EditArticle(res,next,storeFoundArticle,{title,topic,secure_url,public_id,body,author,authorName});
                 });
         }
         else {
-            return helperFunctions.EditArticle(res,next,foundArticle,{title,topic,secure_url,public_id,body,author,authorName});
+            return helperFunctions.EditArticle(res,next,storeFoundArticle,{title,topic,secure_url,public_id,body,author,authorName});
         }
     })
 };
 
+
+exports.getArticlesVersionHistory = (req,res,next) => {
+    const articleId = req.params.articleId;
+
+    ArticleVersionHistory.findById(articleId)
+    .then(versionHistory => {
+        if (!versionHistory) {
+            res.status(404).json({
+                message: "Version History Not Found",
+            });
+        }
+        return res.status(200).json({
+            message: "Version History Fetched Successfully",
+            version_history : versionHistory
+        });
+    })
+    .catch(err => {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    });
+};
 
 exports.deleteArticle = (req,res,next) => {
     const articleId = req.body.articleId;

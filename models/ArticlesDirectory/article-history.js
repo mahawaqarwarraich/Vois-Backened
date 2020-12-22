@@ -4,8 +4,7 @@ const Schema = mongoose.Schema;
 const articleHistorySchema = new Schema({
     Version_History : [{
         article : {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Article"
+            type: Object,
         },
         timeChanged: {
             type: Date,
