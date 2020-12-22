@@ -45,6 +45,7 @@ router.post("/add-article",isAuth,
 
 router.delete("/delete-article",isAuth,articlesController.deleteArticle);
 
+
 router.put("/edit-article",isAuth,
     [
         body("title")
@@ -56,9 +57,9 @@ router.put("/edit-article",isAuth,
         .isEmpty()
     ],articlesController.editArticle);
 
+    router.get("/get-articles-version-history/:articleId",isAuth,articlesController.getArticlesVersionHistory);
+
 router.post("/like-article",isAuth,articlesController.likeArticle);
-
-
 
 
 module.exports = router;

@@ -1,5 +1,7 @@
 const { validationResult } = require("express-validator/check");
 const Article = require("../../models/ArticlesDirectory/article");
+const ArticleVersionHistory = require("../../models/ArticlesDirectory/article-history");
+const { addNewComment } = require("./Comment/comment");
 const helperFunctions = require("./helperFunctions");
 
 exports.getAllArticles = (req,res,next) => {
@@ -349,7 +351,6 @@ exports.searchArticlesByTopic = (req,res,next) => {
             // $regex: new RegExp(keyword)
             topic
     }, {
-        // _id:1,
         __v:0
     })
     // .collation( { locale: 'en', strength: 2 } )
@@ -384,7 +385,6 @@ exports.searchAllArticles = (req,res,next) => {
             $regex: new RegExp(keyword,  "i")
         }}],
     }, {
-        // _id:1,
         __v:0
     })
     // .collation( { locale: 'en', strength: 2 } )
@@ -445,39 +445,85 @@ exports.editArticle = (req,res,next) => {
     }
 
     const articleId = req.body.articleId;
+    const title = req.body.title;
+    const topic = req.body.topic;
+    const body = req.body.body;
+    const author = req.userId;
+    const authorName = req.username;
+    let secure_url = req.body.secure_url;
+    const public_id = req.body.public_id;
+
+
+    let storeFoundArticle;
+
     Article.findById(articleId)
-        .then(article => {
-            if (!article) {
-                res.status(404).json({
-                    message: "Article not found"
+    .then (foundArticle => {
+        if (!foundArticle) {
+            res.status(404).json({
+                message: "Article not found",
+            });
+        }
+        if (foundArticle.Author.id != author) {
+            return res.status(401).json({
+                message: "Not Authorized!"
+            })
+        }
+        storeFoundArticle = foundArticle;
+
+       return ArticleVersionHistory.findById(articleId);
+
+    })
+    .then(foundArticleVersionHistory => {
+        if (!foundArticleVersionHistory) {
+            return new ArticleVersionHistory({
+                _id: articleId
+            }).save();
+        }
+        return foundArticleVersionHistory;
+    })
+    .then(foundArticleVersionHistory=> {
+
+        foundArticleVersionHistory.Version_History.push({article: {}});
+        foundArticleVersionHistory.save();
+
+        if (req.file) {
+            helperFunctions.uploadArticleCover(req.file.path,"articles/")
+                .then(result => {
+                    console.log(result);
+                    const secure_url = result.secure_url;
+                    const public_id = result.public_id;
+                    return helperFunctions.EditArticle(res,next,storeFoundArticle,{title,topic,secure_url,public_id,body,author,authorName});
                 });
-            }
-            if (article.Author != req.userId) {
-                return res.status(401).json({
-                    message: "Not Authorized!"
-                })
-            }
-            article.Title = req.body.title;
-            article.Topic = req.body.topic;
-            article.Body = req.body.body;
-            
-            return article.save();
-        })
-        .then(articleSaved => {
-            if (articleSaved) {
-                res.status(201).json({
-                    message: "Article Edited Successfully"
-                })
-            }
-        })
-        .catch(error => {
-            if (!error.statusCode) {
-                error.statusCode = 500;
-            }
-            next(error);
-        });
+        }
+        else {
+            return helperFunctions.EditArticle(res,next,storeFoundArticle,{title,topic,secure_url,public_id,body,author,authorName});
+        }
+    })
 };
 
+
+exports.getArticlesVersionHistory = (req,res,next) => {
+    const articleId = req.params.articleId;
+
+    ArticleVersionHistory.findById(articleId)
+    .then(versionHistory => {
+        if (!versionHistory) {
+            res.status(404).json({
+                message: "Version History Not Found",
+            });
+        }
+        return res.status(200).json({
+            message: "Version History Fetched Successfully",
+            version_history : versionHistory
+        });
+    })
+    .catch(err => {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    });
+};
 
 exports.deleteArticle = (req,res,next) => {
     const articleId = req.body.articleId;
