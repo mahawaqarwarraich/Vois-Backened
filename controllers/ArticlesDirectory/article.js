@@ -349,7 +349,7 @@ exports.searchArticlesByTopic = (req,res,next) => {
             // $regex: new RegExp(keyword)
             topic
     }, {
-        _id:0,
+        // _id:1,
         __v:0
     })
     // .collation( { locale: 'en', strength: 2 } )
@@ -384,7 +384,7 @@ exports.searchAllArticles = (req,res,next) => {
             $regex: new RegExp(keyword,  "i")
         }}],
     }, {
-        _id:0,
+        // _id:1,
         __v:0
     })
     // .collation( { locale: 'en', strength: 2 } )
