@@ -1,5 +1,6 @@
 const { validationResult } = require("express-validator/check");
 const Article = require("../../models/ArticlesDirectory/article");
+const ArticleVersionHistory = require("../../models/ArticlesDirectory/article-history");
 const helperFunctions = require("./helperFunctions");
 
 exports.getAllArticles = (req,res,next) => {
@@ -349,7 +350,6 @@ exports.searchArticlesByTopic = (req,res,next) => {
             // $regex: new RegExp(keyword)
             topic
     }, {
-        _id:0,
         __v:0
     })
     // .collation( { locale: 'en', strength: 2 } )
@@ -384,7 +384,6 @@ exports.searchAllArticles = (req,res,next) => {
             $regex: new RegExp(keyword,  "i")
         }}],
     }, {
-        _id:0,
         __v:0
     })
     // .collation( { locale: 'en', strength: 2 } )
@@ -445,37 +444,40 @@ exports.editArticle = (req,res,next) => {
     }
 
     const articleId = req.body.articleId;
+    const title = req.body.title;
+    const topic = req.body.topic;
+    const body = req.body.body;
+    const author = req.userId;
+    const authorName = req.username;
+    let secure_url = req.body.secure_url;
+    const public_id = req.body.public_id;
+
     Article.findById(articleId)
-        .then(article => {
-            if (!article) {
-                res.status(404).json({
-                    message: "Article not found"
+    .then (foundArticle => {
+        if (!foundArticle) {
+            res.status(404).json({
+                message: "Article not found",
+            });
+        }
+        if (foundArticle.Author.id != author) {
+            return res.status(401).json({
+                message: "Not Authorized!"
+            })
+        }
+
+        if (req.file) {
+            helperFunctions.uploadArticleCover(req.file.path,"articles/")
+                .then(result => {
+                    console.log(result);
+                    const secure_url = result.secure_url;
+                    const public_id = result.public_id;
+                    return helperFunctions.EditArticle(res,next,foundArticle,{title,topic,secure_url,public_id,body,author,authorName});
                 });
-            }
-            if (article.Author != req.userId) {
-                return res.status(401).json({
-                    message: "Not Authorized!"
-                })
-            }
-            article.Title = req.body.title;
-            article.Topic = req.body.topic;
-            article.Body = req.body.body;
-            
-            return article.save();
-        })
-        .then(articleSaved => {
-            if (articleSaved) {
-                res.status(201).json({
-                    message: "Article Edited Successfully"
-                })
-            }
-        })
-        .catch(error => {
-            if (!error.statusCode) {
-                error.statusCode = 500;
-            }
-            next(error);
-        });
+        }
+        else {
+            return helperFunctions.EditArticle(res,next,foundArticle,{title,topic,secure_url,public_id,body,author,authorName});
+        }
+    })
 };
 
 

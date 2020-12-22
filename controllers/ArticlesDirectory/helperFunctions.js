@@ -69,3 +69,48 @@ exports.createNewArticle = (res,next,article) => {
             next(error);
         });
 }
+
+
+
+const EditArticleObject = (foundArticle,article) => {
+    return new Promise (resolve => {
+        if (article.secure_url && article.public_id) {
+            foundArticle.Title = article.title;
+            foundArticle.Topic = article.topic;
+            foundArticle.PictureSecureId = article.secure_url;
+            foundArticle.PicturePublicId = article.public_id;
+            foundArticle.Body = article.body;
+            resolve(foundArticle.save());
+        }
+        else if (article.secure_url && !article.public_id) {
+            foundArticle.Title = article.title;
+            foundArticle.Topic = article.topic;
+            foundArticle.PictureSecureId = article.secure_url;
+            foundArticle.Body = article.body;
+            resolve(foundArticle.save());
+        }
+        else {
+            foundArticle.Title = article.title;
+            foundArticle.Topic = article.topic;
+            foundArticle.PictureSecureId = article.secure_url;
+            foundArticle.Body = article.body;
+            resolve(foundArticle.save());
+        }
+    });
+}
+
+exports.EditArticle = (res,next,foundArticle,article) => {
+    return EditArticleObject(foundArticle,article)
+        .then (editedArticle => {
+            return res.status(201).json({
+                message: "Article Edited Successfully",
+                article : editedArticle
+            });
+        })
+        .catch(error => {
+            if (!error.statusCode) {
+                error.statusCode = 500;
+            }
+            next(error);
+        });
+};
