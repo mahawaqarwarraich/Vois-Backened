@@ -483,7 +483,7 @@ exports.editArticle = (req,res,next) => {
     })
     .then(foundArticleVersionHistory=> {
 
-        foundArticleVersionHistory.Version_History.push({article: {}});
+        foundArticleVersionHistory.Version_History.push({article: storeFoundArticle});
         foundArticleVersionHistory.save();
 
         if (req.file) {
@@ -534,7 +534,7 @@ exports.deleteArticle = (req,res,next) => {
                     message: "Article not found!"
                 })
             }
-            if (article.Author == req.userId) {
+            if (article.Author.id == req.userId) {
                 return article.remove();
             }
             res.status(401).json({
