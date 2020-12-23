@@ -43,7 +43,7 @@ router.post("/add-article",isAuth,
         .isEmpty()
     ],articlesController.addArticle);
 
-router.delete("/delete-article",isAuth,articlesController.deleteArticle);
+router.post("/delete-article",isAuth,articlesController.deleteArticle);
 
 
 router.post("/edit-article",isAuth,
@@ -58,6 +58,7 @@ router.post("/edit-article",isAuth,
     ],articlesController.editArticle);
 
     router.get("/get-articles-version-history/:articleId",isAuth,articlesController.getArticlesVersionHistory);
+
 
 router.post("/like-article",isAuth,articlesController.likeArticle);
 

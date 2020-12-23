@@ -419,7 +419,7 @@ exports.addArticle = (req,res,next) => {
     const imgUrl = req.body.link;
     let secure_url = null;
     const public_id = null;
-
+console.log(authorName);
     if (req.file) {
         helperFunctions.uploadArticleCover(req.file.path,"articles/")
             .then(result => {
@@ -534,7 +534,7 @@ exports.deleteArticle = (req,res,next) => {
                     message: "Article not found!"
                 })
             }
-            if (article.Author == req.userId) {
+            if (article.Author.id == req.userId) {
                 return article.remove();
             }
             res.status(401).json({
