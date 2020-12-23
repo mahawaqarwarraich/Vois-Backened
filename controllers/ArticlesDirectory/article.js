@@ -483,7 +483,7 @@ exports.editArticle = (req,res,next) => {
     })
     .then(foundArticleVersionHistory=> {
 
-        foundArticleVersionHistory.Version_History.push({article: {}});
+        foundArticleVersionHistory.Version_History.push({article: storeFoundArticle});
         foundArticleVersionHistory.save();
 
         if (req.file) {

@@ -70,6 +70,8 @@ exports.uploadProfilePicture = (req,res,next) => {
     let secure_url = null;
     let public_id = null;
 
+    console.log(req.file);
+
     cloudinary.v2.uploader.upload(req.file.path,
         { folder: "profile/"+req.userId+"/"+"dp/",type:"private"},
         (error,result)=>{

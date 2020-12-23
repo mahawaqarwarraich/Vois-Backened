@@ -46,7 +46,7 @@ router.post("/add-article",isAuth,
 router.delete("/delete-article",isAuth,articlesController.deleteArticle);
 
 
-router.put("/edit-article",isAuth,
+router.post("/edit-article",isAuth,
     [
         body("title")
         .trim()
