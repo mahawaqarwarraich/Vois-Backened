@@ -5,6 +5,7 @@ const articlesController = require("../../controllers/ArticlesDirectory/article"
 
 const router = express.Router();
 
+
 router.get("/get-all-articles",articlesController.getAllArticles);
 
 router.get('/get-articles-by-topic/:topic',articlesController.getArticlesByTopic);

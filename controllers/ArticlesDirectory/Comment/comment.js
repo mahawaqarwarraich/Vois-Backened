@@ -6,43 +6,15 @@ const User = require("../../../models/User/user");
 
 
 
-// exports.getArticleCommentsWithReplies = (req,res,next) => {
-//     const articleId = req.params.articleId;
-//     let articleComments = [];
-//     Article.findById(articleId)
-//         .then(article => {
-//             if (!article) {
-//                 res.status(404).json({
-//                     message: "Article not found"
-//                 })
-//             }
-//             article.populate('Comments')
-//                 .execPopulate();
-//         })
-//         .then(populatedArticle => {
-//             return populatedArticle.Comments;
-//         })
-//         .then(onlyComments => {
-//             console.log(onlyComments);
-//         })
-//         .then(articleWithCommentsPopulated => {
-//             articleWithCommentsPopulated.Comments.forEach(comment => {
-//                 articleComments.push({text:comment.Text,postedOn: comment.postedOn,author: comment.Author.Username, replies:comment.Replies});
-//             });
-//             return res.status(200).json({
-//                 message: "Comments fetched successfully",
-//                 comments: articleComments
-//             })
-//         })
-//         .catch(error => {
-//             if (!error.statusCode) {
-//                 error.statusCode = 500;
-//             }
-//             next(error);
-//         });
-// };
-
-
+/**
+ * controller to get all the comments for a particular 
+ * article whose id is sent via the params in the url.
+ * Article has a comments array which are only references 
+ * and to get the data of those comments populate function 
+ * is used and inside it the nested populate is used to get
+ * author information because in comments there is a field 
+ * which references author which is a User object.
+ */
 exports.getArticleCommentsWithReplies = async (req,res,next) => {
     const articleId = req.params.articleId;
 
@@ -66,6 +38,15 @@ exports.getArticleCommentsWithReplies = async (req,res,next) => {
 }
 
 
+/**
+ * controller function to add a new comment in the article.
+ * It first validates the body and if there's any validation
+ * error it throws it. Then it checks if the article exists or 
+ * not because someone can manipulate the article id or even
+ * send a bogus id from postman or some other tool. If 
+ * article is found then the comment is created and pushed 
+ * in the Comments[] of the article.
+ */
 exports.addNewComment = (req,res,next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -113,41 +94,46 @@ exports.addNewComment = (req,res,next) => {
         });
 };
 
+
+/**
+ * controller to delete a particular comment from the article.
+ * The id for that comment is sent via the body of the request.
+ */
 exports.deleteComment = (req, res, next) => {
     let loadedArticle;
     let loadedComment;
-    Article.findById(req.body.articleId)
+    Article.findById(req.body.articleId) // if the article exists
         .then(article => {
             if (!article) {
                 return res.status(404).json({
                     message: "Article not found!"
                 })
             }
-            loadedArticle = article;
-            return Comment.findById(req.body.commentId);
+            loadedArticle = article; //storing it for later use
+            return Comment.findById(req.body.commentId); // finding a given comment
         })
         .then(comment => {
             if (!comment) {
-                return res.status(404).json({
+                return res.status(404).json({ //if not found return error in json format
                     message: "Comment not found!"
                 })
             }
             loadedComment = comment;
-            if (loadedComment.Author == req.userId) {
-                loadedArticle.Comments = loadedArticle.Comments.filter(comment => {
+            if (loadedComment.Author == req.userId) { //checking whether the author of the comment is deleting it
+                loadedArticle.Comments = loadedArticle.Comments.filter(comment => { //filter article comments
                     return comment != req.body.commentId;
                 })
             }
             else {
-                return res.status(401).json({
+                return res.status(401).json({ //if the author is not deleting then returning unauthorized error
                     message: "Not Authorized"
                 });
             }
-            return loadedArticle.save();
+            return loadedArticle.save(); // saving article after deleting the comment
         })
         .then(articleSaved => {
             if (articleSaved) {
-                return loadedComment.remove();
+                return loadedComment.remove(); 
             }
         })
         .then (commentRemoved => {
@@ -165,7 +151,11 @@ exports.deleteComment = (req, res, next) => {
         });
         
 };
-
+/**
+ * controller function to edit the comment. 
+ * This makes sure that the current user is the author of 
+ * the comment who is editing it.
+ */
 exports.editComment = (req, res, next) => {
         Comment.findById(req.body.commentId)
         .then(comment => {
@@ -174,7 +164,7 @@ exports.editComment = (req, res, next) => {
                     message: "Comment not found"
                 });
             } else {
-                if (comment.Author == req.userId) {
+                if (comment.Author == req.userId) { // if the author of the comment is editing it
                     comment.Text = req.body.updatedText;
                     return comment.save();
                 }
@@ -198,6 +188,12 @@ exports.editComment = (req, res, next) => {
         });
 };
 
+/**
+ * controller to like and unlike the comment 
+ * based on the status of the previous activity. 
+ * If it was liked before then it removes the like or
+ * else push the User object Id in the Likes [] array of the comment.
+ */
 exports.likeComment = (req,res,next) => {
     Comment.findById(req.body.commentId)
         .then(comment => {

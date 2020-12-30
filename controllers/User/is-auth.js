@@ -5,6 +5,21 @@ const jwt = require('jsonwebtoken');
 const User = require('../../models/User/user');
 const Profile = require('../../models/User/profile');
 
+
+/**
+ * controller function which registers a new user.
+ * Before any proceeding, it checks the validity of the 
+ * fields sent via the body of the request. And if there's
+ * any validation error, it sends back the error with the error
+ * information to the client.
+ * The data sent via the body contains password of the user
+ * and this function makes sure that the password is not stored
+ * directly in plain form in the db because it can be very risky
+ * so the bcrypt hashing is used to encode the password and store
+ * it in the hashed form.
+ * Moreover, at the time of creation of the new account, the user profile
+ * is also created.
+ */
 exports.userSignUp = (req, res, next) => {
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
@@ -14,16 +29,17 @@ exports.userSignUp = (req, res, next) => {
 		console.log(error.data);
 		throw error;
 	}
+	// storing data sent via the body if there's not validation errors
     const username = req.body.username;
     const email    = req.body.email;
 	const password = req.body.password;
 	let hashedPassword = null;
 	bcrypt
 		.hash(password, 12)
-		.then((hashedPw) => {
+		.then((hashedPw) => { // function to hash the user password
 
 			hashedPassword = hashedPw;
-			const profile = new Profile({
+			const profile = new Profile({ // creating new user profile for the new user with default image as profile dp
 				PersonalDescription: "No Description Added Yet",
 				ProfilePhotoSecureId : "https://i.pinimg.com/736x/43/30/da/4330da45e2f3a808092cced2543b35c5.jpg",
 				ProfilePhotoPublicId : null
@@ -31,13 +47,13 @@ exports.userSignUp = (req, res, next) => {
 			return profile.save();
 		})
 		.then(userProfileSaved => {
-			const user = new User({
+			const user = new User({ // creating new user 
                 Username: username,
                 Email   : email,
 				Password: hashedPassword,
 				Profile: userProfileSaved._id
 			});
-			return user.save();
+			return user.save(); //saving the new user in the database
 		})
 		.then((result) => {
 			res.status(201).json({ message: 'User Account created!', userId: result._id });
@@ -50,6 +66,17 @@ exports.userSignUp = (req, res, next) => {
 		});
 };
 
+
+/**
+ * controller function to login a user. 
+ * This takes email and password in body 
+ * and checks whether a user with the provided email exists.
+ * Then it makes use of bcrypt again to match the password entered
+ * and if the passwords are equal then the main step comes which is
+ * to create a jwt token and the userid and username is stored in 
+ * it and the expiry is set for 24 hours. The token created is 
+ * sent as a json response to the client side.
+ */
 exports.userLogin = (req, res, next) => {
 	const email = req.body.email;
 	const password = req.body.password;
@@ -63,7 +90,7 @@ exports.userLogin = (req, res, next) => {
 				throw error;
 			}
 			loadedUser = user;
-			return bcrypt.compare(password, user.Password);
+			return bcrypt.compare(password, user.Password); // comparing passwords
 		})
 		.then((isEqual) => {
 			if (!isEqual) {
@@ -71,7 +98,7 @@ exports.userLogin = (req, res, next) => {
 				error.statusCode = 401;
 				throw error;
 			}
-			const token = jwt.sign(
+			const token = jwt.sign( // creating a jwt signed token
 				{
 					name: loadedUser.Username,
 					userId: loadedUser._id.toString(),
@@ -79,7 +106,7 @@ exports.userLogin = (req, res, next) => {
 				'Thisisasecret-password-tercesasisihT',
 				{ expiresIn: '24h' }
 			);
-			res.status(200).json({
+			res.status(200).json({ //sending back json repsonse
 				token: token,
 				username: loadedUser.Username,
 				userId: loadedUser._id.toString()

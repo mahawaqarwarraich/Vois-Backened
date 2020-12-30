@@ -3,6 +3,8 @@ const helperFunctions = require ("./helperFunctions");
 const { validationResult } = require("express-validator/check");
 
 
+
+// controller function to fetch all the article topics
 exports.getArticleTopics = (req,res,next) => {
     ArticleTopic.find()
     .then(articlesTopics=> {
@@ -25,8 +27,15 @@ exports.getArticleTopics = (req,res,next) => {
     });
 };
 
+
+/**
+ * controller function to fetch and send back
+ * the names of the article topics currently 
+ * in the database to show while creating new 
+ * article at the client side.
+ */
 exports.getArticleTopicNames = (req,res,next) => {
-    let articleTopics = [];
+    let articleTopics = []; //array of names of article topics
     ArticleTopic.find()
         .then(topics => {
             if (!topics) {
@@ -54,6 +63,12 @@ exports.getArticleTopicNames = (req,res,next) => {
         });
 };
 
+
+/**
+ * controller function to add a new article topic 
+ * with name, description and cover image. 
+ * The cover image is saved in the cloudinary.
+ */
 exports.addNewArticleTopic = (req,res,next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -67,8 +82,10 @@ exports.addNewArticleTopic = (req,res,next) => {
     const Description = req.body.description;
 
     if (req.file) {
+        // if there's a file (image) then it is uploaded in the clouldinary cloud provider with the folder name article-topics
         helperFunctions.uploadArticleCover(req.file.path,"article-topics/")
             .then(result => {
+                // as a result url and the id are returned
                 const secure_url = result.secure_url;
                 const public_id = result.public_id;
                 return new ArticleTopic({

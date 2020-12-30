@@ -16,7 +16,7 @@ router.post(
     .isEmpty(),
     body("email")
       .custom((value, { req }) => {
-        return User.findOne({ Email: value }).then(userDoc => {
+        return User.findOne({ Email: value }).then(userDoc => { // check if the account already exists with the given email
           if (userDoc) {
             return Promise.reject("An account with this email address already exists!");
           }
