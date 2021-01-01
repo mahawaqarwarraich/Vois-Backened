@@ -1,8 +1,5 @@
 // importing json web tokens package to decode hashed token sent from client side
-const { request } = require('express');
 const jwt = require('jsonwebtoken');
-const { getCurrentUserProfile } = require('../controllers/User/user');
-const { notify } = require('../routes/User/user');
 
 
 /**  When added as an argument in the route
