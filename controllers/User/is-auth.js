@@ -212,6 +212,7 @@ exports.VerifyFacialAuthentication = (req,res,next) => {
 	const readStream = createReadStream(req.file.path);
 	fd.append('picture', readStream);
 
+
 	User.find()
 	.then(users => {
 		if (!users) {
@@ -237,11 +238,44 @@ exports.VerifyFacialAuthentication = (req,res,next) => {
 	.then (response => {
 		responseData = response.data;
 		console.log(response.data.id);
+
+		if (response.data.status == 200) {
+			return true;
+		} else {
+			res.status(401).json({
+				message:"Unauthorized"
+			})
+		}
+	})
+	.then (result => {
+		if (result) {
+			return User.findById(responseData.id);
+		}
+	})
+	.then (foundUser => {
+		if (!foundUser) {
+			const error = new Error('No Account with this face');
+			error.statusCode = 404;
+			throw error;
+		}
+		const token = jwt.sign( // creating a jwt signed token
+			{
+				name: foundUser.Username,
+				userId: foundUser._id.toString(),
+			},
+			'Thisisasecret-password-tercesasisihT',
+			{ expiresIn: '24h' }
+		);
+		res.status(200).json({ //sending back json repsonse
+			token: token,
+			username: foundUser.Username,
+			userId: foundUser._id.toString()
+		});
 	})
 	.catch(err => {
 		if (!err.statusCode) {
 			err.statusCode = 500;
 		}
 		next();
-	})
+	});
 }
