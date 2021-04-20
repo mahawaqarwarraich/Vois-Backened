@@ -1,9 +1,26 @@
 const { validationResult } = require('express-validator/check');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+// const req = require("request");
+// const fs = require("fs");
+// const multiparty = require("multiparty");
+const FormData = require ('form-data');
+const request = require('http').request;
+const createReadStream = require('fs').createReadStream;
+const axios = require('axios');
+
 
 const User = require('../../models/User/user');
 const Profile = require('../../models/User/profile');
+
+
+//Cloudinary configuration
+const cloudinary = require('cloudinary');
+cloudinary.config({
+    cloud_name: 'dkj3d1vvs',
+    api_key: "759763123283575",
+    api_secret: '_px1mRCmIfA-b8bgz9NADudJCHY'
+});
 
 
 /**
@@ -119,3 +136,112 @@ exports.userLogin = (req, res, next) => {
 			next(err);
 		});
 };
+
+
+// exports.AddFacialAuthentication = async (req,res,next) => {
+// 	const readStream = createReadStream(req.file.path);
+
+// 	const form = new FormData();
+// 	form.append('picture', readStream);
+
+// 	const newReq = await request(
+// 		{
+// 		  host: 'localhost',
+// 		  port: '5000',
+// 		  path: '/add-facial-auth-check',
+// 		  method: 'POST',
+// 		  headers: form.getHeaders(),
+// 		},
+// 		response => {
+// 			let data = '';
+// 			// A chunk of data has been received.
+// 			response.on('data', (chunk) => {
+// 				data += chunk;
+// 			});			
+// 			// The whole response has been received. Print out the result.
+// 			response.on('end', () => {
+// 				console.log(JSON.parse(data));
+// 			});
+// 		}
+// 	  );
+// 	  form.pipe(newReq);
+// }
+
+exports.AddFacialAuthentication = async (req,res,next) => {
+
+	let responseData;
+	const fd = new FormData();
+	const readStream = createReadStream(req.file.path);
+	fd.append('picture', readStream);
+
+	axios
+	.post("http://localhost:5000/register", fd, {
+	   headers: fd.getHeaders(),
+	})
+	.then((response) => {
+		responseData = response.data;
+		console.log(response.data);
+		return User.findById(req.userId);
+	})
+	.then(user => {
+		if (!user) {
+			const error = new Error('No user found!');
+			error.statusCode = 404;
+			throw error;
+		}
+		user.Encodings = responseData.encodings;
+		console.log(user);
+		return user.save();
+	})
+	.then (result => {
+		res.status(201).json({
+			message: "Facial Auth Added Successfully"
+		})
+	})
+	.catch (err=> {
+        if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+        next(error);
+	})
+
+}
+exports.VerifyFacialAuthentication = (req,res,next) => {
+	let responseData;
+	const fd = new FormData();
+	const readStream = createReadStream(req.file.path);
+	fd.append('picture', readStream);
+
+	User.find()
+	.then(users => {
+		if (!users) {
+			const error = new Error('No users found!');
+			error.statusCode = 404;
+			throw error;
+		}
+		return userWithEncodings = users.map((user) => {
+			return {
+				userId: user._id,
+				encodings: user.Encodings
+			}
+		});
+	})
+	.then (result => {
+		fd.append('userInfo', JSON.stringify(result));
+		console.log(fd);
+		return axios
+		.post("http://localhost:5000/verify", fd, {
+		   headers: fd.getHeaders(),
+		})
+	})
+	.then (response => {
+		responseData = response.data;
+		console.log(response.data.id);
+	})
+	.catch(err => {
+		if (!err.statusCode) {
+			err.statusCode = 500;
+		}
+		next();
+	})
+}

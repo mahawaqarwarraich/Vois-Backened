@@ -3,6 +3,7 @@ const { body } = require("express-validator/check");
 
 const User = require("../../models/User/user");
 const authController = require("../../controllers/User/is-auth");
+const isAuth = require("../../middleware/is-auth");
 
 const router = express.Router();
 
@@ -45,5 +46,9 @@ router.post("/login",
         .not()
         .isEmpty()
 ],authController.userLogin);
+
+router.post("/add-facial-auth",isAuth,authController.AddFacialAuthentication);
+router.post("/verify-facial-auth",authController.VerifyFacialAuthentication);
+
 
 module.exports = router;

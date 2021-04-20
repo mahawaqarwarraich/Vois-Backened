@@ -20,7 +20,7 @@ router.get("/get-article/:id",articlesController.getArticle);
 
 router.get("/get-fav-articles",isAuth,articlesController.getFavArticles);
 
-router.get("/get-latest-fav-articles",isAuth,articlesController.getLatestFavArticles);
+router.get("/get-latest-fav-articles/:userId",isAuth,articlesController.getLatestFavArticles);
 
 router.get("/get-my-blogs",isAuth,articlesController.getMyBlogs);
 

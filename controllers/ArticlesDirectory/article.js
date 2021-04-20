@@ -135,8 +135,8 @@ exports.getLatestFavArticles = (req,res,next) => {
              * 3 and if that is the case only storing latest
              * 3 articles.
              */
-            if (favArticles.length >3) {
-                return [favArticles[0],favArticles[1],favArticles[2]]
+            if (favArticles.length >4) {
+                return [favArticles[0],favArticles[1],favArticles[2],favArticles[3]]
             } 
             return favArticles;
         })
@@ -207,7 +207,7 @@ exports.getUserLatestArticles = (req,res,next) => {
                     articles: articles
                 });
             }
-            console.log(articles);
+            // console.log(articles);
             articles = articles.filter(article => {
                 return article.Author.id == userId; //filtering only required user's articles
             });
@@ -242,7 +242,7 @@ exports.getAllUserArticles = (req,res,next) => {
                     articles: articles
                 });
             }
-            console.log(articles);
+            // console.log(articles);
             articles = articles.filter(article => {
                 return article.Author.id == userId;
             });
@@ -541,11 +541,11 @@ exports.addArticle = (req,res,next) => {
     const imgUrl = req.body.link;
     let secure_url = null;
     const public_id = null;
-console.log(authorName);
+// console.log(authorName);
     if (req.file) {
         helperFunctions.uploadArticleCover(req.file.path,"articles/") // function to upload cover image to the cloud
             .then(result => {
-                console.log(result);
+                // console.log(result);
                 const secure_url = result.secure_url;
                 const public_id = result.public_id;
                 // createNewArticle is the function which actually creates a new article in the datbase
@@ -629,7 +629,7 @@ exports.editArticle = (req,res,next) => {
             // if new file is there then uploading it to the cloud and calling editArticle function to save new paths.
             helperFunctions.uploadArticleCover(req.file.path,"articles/")
                 .then(result => {
-                    console.log(result);
+                    // console.log(result);
                     const secure_url = result.secure_url;
                     const public_id = result.public_id;
                     return helperFunctions.EditArticle(res,next,storeFoundArticle,{title,topic,secure_url,public_id,body,author,authorName});

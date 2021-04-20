@@ -19,6 +19,10 @@ const userSchema = new Schema ( {
     Profile : {
         type : mongoose.Schema.Types.ObjectId,
         ref : "UserProfile"
+    },
+    Encodings : {
+        type: String,
+        required: false
     }
 });
 
