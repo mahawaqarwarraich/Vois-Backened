@@ -221,11 +221,18 @@ exports.VerifyFacialAuthentication = (req,res,next) => {
 			throw error;
 		}
 		return userWithEncodings = users.map((user) => {
-			return {
-				userId: user._id,
-				encodings: user.Encodings
+			if (user.Encodings) {
+				return {
+					userId: user._id,
+					encodings: user.Encodings
+				}
 			}
 		});
+	})
+	.then(mappedUsers => {
+		return mappedUsers.filter(mappedUser => {
+			return mappedUser !=null;
+		})
 	})
 	.then (result => {
 		fd.append('userInfo', JSON.stringify(result));
