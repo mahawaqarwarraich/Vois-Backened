@@ -87,6 +87,9 @@ app.use(userRoutes);
 const textEditorRoutes = require("./routes/TextEditor/text_editor");
 app.use(textEditorRoutes);
 
+const CVBuilderRoutes = require("./routes/CVBuilder/cv-builder");
+app.use(CVBuilderRoutes);
+
                     //=======================//
 //==================//         END           //============================//
                     //=======================//
