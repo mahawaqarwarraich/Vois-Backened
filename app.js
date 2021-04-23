@@ -90,6 +90,9 @@ app.use(textEditorRoutes);
 const CVBuilderRoutes = require("./routes/CVBuilder/cv-builder");
 app.use(CVBuilderRoutes);
 
+const PortfolioRoutes = require("./routes/PortfolioBuilder/portfolio-builder");
+app.use(PortfolioRoutes);
+
                     //=======================//
 //==================//         END           //============================//
                     //=======================//
