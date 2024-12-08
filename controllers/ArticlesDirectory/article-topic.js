@@ -1,6 +1,6 @@
 const ArticleTopic = require ("../../models/ArticlesDirectory/article-topic");
 const helperFunctions = require ("./helperFunctions");
-const { validationResult } = require("express-validator/check");
+const { validationResult } = require("express-validator");
 
 
 
@@ -14,6 +14,7 @@ exports.getArticleTopics = (req,res,next) => {
                 articleTopics : articlesTopics
             })
         }
+        console.log(articlesTopics)
         res.status(200).json({
             message: "Article Topics fetched succesfuly",
             articleTopics: articlesTopics

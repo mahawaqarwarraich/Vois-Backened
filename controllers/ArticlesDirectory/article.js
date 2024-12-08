@@ -1,4 +1,4 @@
-const { validationResult } = require("express-validator/check");
+const { validationResult } = require("express-validator");
 const Article = require("../../models/ArticlesDirectory/article");
 const ArticleVersionHistory = require("../../models/ArticlesDirectory/article-history");
 const { addNewComment } = require("./Comment/comment");

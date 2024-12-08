@@ -99,10 +99,13 @@ app.use(PortfolioRoutes);
 
 
 
-// const MONGODB_URI = "mongodb://Muzamil:password123@ds137957.mlab.com:37957/bemyhand";
-const MONGODB_URI = "mongodb://admin:rKp0gAoByvmdNcAr@cluster0-shard-00-00.1ddwl.mongodb.net:27017,cluster0-shard-00-01.1ddwl.mongodb.net:27017,cluster0-shard-00-02.1ddwl.mongodb.net:27017/BeMyHand?ssl=true&replicaSet=atlas-a0vxl9-shard-0&authSource=admin&retryWrites=true&w=majority";
+const MONGODB_URI = "mongodb://127.0.0.1:27017/Vois";
+// const MONGODB_URI = "mongodb://admin:rKp0gAoByvmdNcAr@cluster0-shard-00-00.1ddwl.mongodb.net:27017,cluster0-shard-00-01.1ddwl.mongodb.net:27017,cluster0-shard-00-02.1ddwl.mongodb.net:27017/BeMyHand?ssl=true&replicaSet=atlas-a0vxl9-shard-0&authSource=admin&retryWrites=true&w=majority";
 mongoose
-    .connect(MONGODB_URI)
+    .connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
     .then(result => {
         app.listen(8000);
         console.log("connected to the sever");
@@ -111,3 +114,6 @@ mongoose
         console.log(error);
     });
 
+app.listen(8080, ()=> {
+  console.log('app is listening')
+})

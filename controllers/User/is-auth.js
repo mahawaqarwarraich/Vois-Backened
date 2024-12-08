@@ -1,4 +1,4 @@
-const { validationResult } = require('express-validator/check');
+const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 // const req = require("request");
@@ -121,7 +121,7 @@ exports.userLogin = (req, res, next) => {
 					userId: loadedUser._id.toString(),
 				},
 				'Thisisasecret-password-tercesasisihT',
-				{ expiresIn: '24h' }
+				{ expiresIn: '7d' }
 			);
 			res.status(200).json({ //sending back json repsonse
 				token: token,
@@ -197,12 +197,13 @@ exports.AddFacialAuthentication = async (req,res,next) => {
 		res.status(201).json({
 			message: "Facial Auth Added Successfully"
 		})
+		
 	})
 	.catch (err=> {
-        if (!error.statusCode) {
-            error.statusCode = 500;
+        if (!err.statusCode) {
+            err.statusCode = 500;
         }
-        next(error);
+        next(err);
 	})
 
 }

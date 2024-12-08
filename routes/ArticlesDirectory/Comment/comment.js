@@ -1,5 +1,5 @@
 const express = require ("express");
-const { body } = require("express-validator/check");
+const { body } = require("express-validator");
 const isAuth = require("../../../middleware/is-auth");
 const commentController = require("../../../controllers/ArticlesDirectory/Comment/comment");
 const router = express.Router();

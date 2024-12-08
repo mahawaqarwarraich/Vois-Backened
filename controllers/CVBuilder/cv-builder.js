@@ -1,4 +1,4 @@
-const { validationResult } = require("express-validator/check");
+const { validationResult } = require("express-validator");
 const CV = require("../../models/CVBuilder/cv-builder");
 const helperFunctions = require("./helperFunctions");
 

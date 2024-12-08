@@ -1,4 +1,4 @@
-const { validationResult } = require("express-validator/check");
+const { validationResult } = require("express-validator");
 const Comment = require("../../../models/ArticlesDirectory/Comment/comment");
 const Reply = require("../../../models/ArticlesDirectory/Comment/reply");
 const Article = require("../../../models/ArticlesDirectory/article");
